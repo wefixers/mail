@@ -1,0 +1,68 @@
+{
+  "name": "@fixers/mail",
+  "type": "module",
+  "version": "1.0.0",
+  "author": "Luca <git@lucacicada.me>",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js"
+    },
+    "./mailers/mailgun": {
+      "types": "./lib/mailers/mailgun.d.ts",
+      "import": "./lib/mailers/mailgun.js"
+    },
+    "./mailers/ses": {
+      "types": "./lib/mailers/ses.d.ts",
+      "import": "./lib/mailers/ses.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "scripts": {
+    "clean": "rimraf ./lib",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "prebuild": "npm run clean",
+    "build": "npm run clean && tsc",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-ses": "^3.340.0",
+    "nodemailer": "^6.5.0",
+    "nodemailer-mailgun-transport": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@aws-sdk/client-ses": {
+      "optional": true
+    },
+    "nodemailer": {
+      "optional": true
+    },
+    "nodemailer-mailgun-transport": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.39.3",
+    "@aws-sdk/client-ses": "^3.341.0",
+    "@rollup/plugin-typescript": "^11.1.1",
+    "@types/nodemailer": "^6.4.8",
+    "@types/nodemailer-mailgun-transport": "^1.4.3",
+    "eslint": "^8.41.0",
+    "nodemailer": "^6.9.3",
+    "nodemailer-mailgun-transport": "^2.1.5",
+    "rimraf": "^5.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4",
+    "vitest": "^0.31.1"
+  }
+}
