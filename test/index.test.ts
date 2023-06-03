@@ -31,12 +31,35 @@ it('creates a mailer', async () => {
     },
   })
 
-  expect(mailer).not.toBeFalsy()
+  expect(mailer).toBeTypeOf('object')
+
+  expect(mailer).toHaveProperty('default')
+  expect(mailer).toHaveProperty('sendMail')
+  expect(mailer).toHaveProperty('sendMailWith')
+
+  expect(mailer.default).toBeTypeOf('string')
+  expect(mailer.sendMail).toBeTypeOf('function')
+  expect(mailer.sendMailWith).toBeTypeOf('function')
+
   expect(mailer.default).toBe('mailgun')
 
-  expect(await mailer.mailer('test')).not.toBeFalsy()
-  expect(await mailer.mailer('mailgun')).not.toBeFalsy()
-  expect(await mailer.mailer('ses')).not.toBeFalsy()
-
+  // test a send email with test
   expect(await mailer.sendMailWith('test', testEmail)).toBe(testEmail)
+  expect(await mailer.mailer(null)).toBe(await mailer.mailer('mailgun'))
+
+  for (const mailerKey of ['test', 'mailgun', 'ses']) {
+    const resolvedMailer = await mailer.mailer(mailerKey)
+
+    expect(resolvedMailer).toBeTypeOf('object')
+    expect(resolvedMailer).toHaveProperty('sendMail')
+    expect(resolvedMailer.sendMail).toBeTypeOf('function')
+  }
+
+  await expect(mailer.mailer('')).rejects.toBeInstanceOf(Error)
+
+  // NOTE: the mailer is empty therefore it takes 2 whitespace ↓ this is not a typo!
+  await expect(mailer.mailer('')).rejects.toThrowError('Mailer  is not configured.')
+
+  await expect(mailer.mailer('<none>')).rejects.toBeInstanceOf(Error)
+  await expect(mailer.mailer('<none>')).rejects.toThrowError('Mailer <none> is not configured.')
 })
