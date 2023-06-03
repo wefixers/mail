@@ -1,6 +1,23 @@
 # Changelog
 
 
+## v1.2.0
+
+[compare changes](https://github.com/wefixers/mail/compare/v1.1.1...v1.2.0)
+
+
+### 🚀 Enhancements
+
+  - Generic mailer key! ([b15afaa](https://github.com/wefixers/mail/commit/b15afaa))
+
+### 📖 Documentation
+
+  - More config options and caveats ([880d807](https://github.com/wefixers/mail/commit/880d807))
+
+### ❤️  Contributors
+
+- Lucacicada
+
 ## v1.1.1
 
 [compare changes](https://github.com/wefixers/mail/compare/v1.1.0...v1.1.1)
