@@ -25,18 +25,18 @@ export type MailersConfig = Record<string, Mailer | MailerFactory>
 /**
  * Represents a mailer provider, it holds a collection of mailers and provides access to a default configured mailer.
  */
-export interface MailerProvider extends Mailer {
+export interface MailerProvider<TMailer extends string> extends Mailer {
   /**
    * The default mailer to use.
    */
-  default: string
+  default: TMailer
 
   /**
    * Get a mailer. Subsequential calls return a cached value.
    *
    * @remarks It returns a promise as mailers are instantiated on-demand.
    */
-  mailer: (mailer: string | null) => Promise<Mailer>
+  mailer: (mailer: TMailer | null) => Promise<Mailer>
 
   // /**
   //  * Get a mailer driver, it always re-run the factory function, no caching is performed.
@@ -48,7 +48,7 @@ export interface MailerProvider extends Mailer {
   /**
    * Sends an email with a specific mailer, use `null` if you want to use the default mailer.
    */
-  sendMailWith: (mailer: string | null, mail: SendMailOptions) => Promise<any>
+  sendMailWith: (mailer: TMailer | null, mail: SendMailOptions) => Promise<any>
 }
 
 /**
@@ -85,8 +85,8 @@ export interface MailerOptions {
  * })
  * ```
  */
-export function createMailer(options: MailerOptions): MailerProvider {
-  return new _MailerProvider(options)
+export function createMailer<TMailer extends string = string>(options: MailerOptions): MailerProvider<TMailer> {
+  return new _MailerProvider<TMailer>(options)
 }
 
 /**
@@ -107,11 +107,11 @@ async function factory(options: Mailer | MailerFactory): Promise<Mailer> {
  * - It does perform some manipulation on the `options` object unnecessarily.
  * - It may store mailers object **references** twice, one in `#config` and the other in `#mailers`.
  */
-class _MailerProvider implements MailerProvider {
+class _MailerProvider<TMailer extends string> implements MailerProvider<TMailer> {
   /**
    * The default mailer key.
    */
-  default: string
+  default: TMailer
 
   /**
    * The mailers config, it contains either a factory or an instance.
@@ -129,7 +129,7 @@ class _MailerProvider implements MailerProvider {
    * #### Note: do not use this class directly, prefer {@link createMailer} when possible.
    */
   constructor({ default: defaultMailer, mailers: { ...config } }: MailerOptions) {
-    this.default = defaultMailer
+    this.default = defaultMailer as TMailer
     this.#config = config
   }
 
