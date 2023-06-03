@@ -2,8 +2,18 @@
   "name": "@fixers/mail",
   "type": "module",
   "version": "1.1.0",
+  "description": "Extraterrestrial efficiency in email transmission!",
   "author": "Luca <git@lucacicada.me>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wefixers/mail.git"
+  },
+  "keywords": [
+    "mail",
+    "email",
+    "nodemailer"
+  ],
   "sideEffects": false,
   "exports": {
     ".": {
