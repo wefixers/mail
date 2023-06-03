@@ -1,6 +1,19 @@
 # Changelog
 
 
+## v1.1.1
+
+[compare changes](https://github.com/wefixers/mail/compare/v1.1.0...v1.1.1)
+
+
+### 🏡 Chore
+
+  - Add package repository and description! ([c3e0b22](https://github.com/wefixers/mail/commit/c3e0b22))
+
+### ❤️  Contributors
+
+- Lucacicada
+
 ## v1.1.0
 
 [compare changes](https://github.com/wefixers/mail/compare/v1.0.0...v1.1.0)
