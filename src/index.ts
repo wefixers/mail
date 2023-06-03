@@ -1,16 +1,5 @@
 import type { SendMailOptions } from 'nodemailer'
 
-/**
- * Creates a transport on-demand.
- */
-async function factory(options: Mailer | MailerFactory): Promise<Mailer> {
-  if (typeof options === 'function') {
-    return await options()
-  }
-
-  return options
-}
-
 export type { SendMailOptions }
 
 /**
@@ -20,57 +9,61 @@ export interface Mailer<T = any> {
   /**
    * Sends an email.
    */
-  sendMail: (mailOptions: SendMailOptions) => Promise<T>
+  sendMail: (mail: SendMailOptions) => Promise<T>
 }
 
-type PromiseOr<T> = Promise<T> | T
-type MailerFactory = () => PromiseOr<Mailer>
-type MailersConfig = Record<string, Mailer | MailerFactory>
-type MailerType<T> = T extends MailerFactory ? Awaited<ReturnType<T>> : T extends Mailer ? T : never
-type MailerSentType<T> = T extends Mailer<infer U> ? U : never
+/**
+ * Represents a factory function that creates a {@link Mailer}.
+ */
+export type MailerFactory = () => (Promise<Mailer> | Mailer)
+
+/**
+ * Represents a collection of {@link Mailer} and their associated names.
+ */
+export type MailersConfig = Record<string, Mailer | MailerFactory>
 
 /**
  * Represents a mailer provider, it holds a collection of mailers and provides access to a default configured mailer.
  */
-export interface MailerProvider<T extends MailersConfig, TDefaultMailer extends keyof T> extends Mailer<MailerSentType<MailerType<T[TDefaultMailer]>>> {
+export interface MailerProvider extends Mailer {
   /**
    * The default mailer to use.
    */
-  readonly default: TDefaultMailer
+  default: string
 
   /**
-   * Get a mailer. Subsequential call return a cached value.
+   * Get a mailer. Subsequential calls return a cached value.
    *
    * @remarks It returns a promise as mailers are instantiated on-demand.
    */
-  mailer: <TMailer extends keyof T>(mailer: TMailer) => Promise<MailerType<T[TMailer]>>
+  mailer: (mailer: string | null) => Promise<Mailer>
 
   // /**
   //  * Get a mailer driver, it always re-run the factory function, no caching is performed.
   //  *
   //  * @remarks It returns a promise as mailers are instantiated on-demand.
   //  */
-  // driver: <TMailer extends keyof T>(mailer: TMailer) => Promise<MailerType<T[TMailer]>>
+  // driver: (mailer: TMailer) => Promise<MailerType<T[TMailer]>>
 
   /**
-   * Sends an email with a specific mailer.
+   * Sends an email with a specific mailer, use `null` if you want to use the default mailer.
    */
-  sendMailWith: <TMailer extends keyof T>(mailer: TMailer, mailOptions: SendMailOptions) => Promise<MailerSentType<MailerType<T[TMailer]>>>
+  sendMailWith: (mailer: string | null, mail: SendMailOptions) => Promise<any>
 }
 
 /**
  * Represent a set of options for a mailer provider.
  */
-export interface MailerOptions<T extends MailersConfig = MailersConfig> {
+export interface MailerOptions {
   /**
    * The default mailer to use.
    */
-  default: keyof T
+  default: string
 
   /**
    * The mailers configuration options.
    */
-  mailers: T
+  mailers: MailersConfig
 }
 
 /**
@@ -92,23 +85,33 @@ export interface MailerOptions<T extends MailersConfig = MailersConfig> {
  * })
  * ```
  */
-export function createMailer<const T extends MailerOptions>(options: T): MailerProvider<T['mailers'], T['default']> {
-  return new _MailerProvider<T['mailers'], T['default']>(options)
+export function createMailer(options: MailerOptions): MailerProvider {
+  return new _MailerProvider(options)
+}
+
+/**
+ * Creates a transport on-demand.
+ */
+async function factory(options: Mailer | MailerFactory): Promise<Mailer> {
+  if (typeof options === 'function') {
+    return await options()
+  }
+
+  return options
 }
 
 /**
  * An implementation of a mailer provider.
  *
  * ### Note for developers
- * - This class uses `any` extensively.
  * - It does perform some manipulation on the `options` object unnecessarily.
- * - It does store mailers object **references** twice, one in `#config` and the other in `#mailers`.
+ * - It may store mailers object **references** twice, one in `#config` and the other in `#mailers`.
  */
-class _MailerProvider<T extends MailersConfig, TDefaultMailer extends keyof T> implements MailerProvider<T, TDefaultMailer> {
+class _MailerProvider implements MailerProvider {
   /**
    * The default mailer key.
    */
-  #default: PropertyKey
+  default: string
 
   /**
    * The mailers config, it contains either a factory or an instance.
@@ -118,29 +121,27 @@ class _MailerProvider<T extends MailersConfig, TDefaultMailer extends keyof T> i
   /**
    * The resolved mailers.
    */
-  #mailers: Record<PropertyKey, Mailer> = {}
+  #mailers: Record<string, Mailer> = {}
 
   /**
    * Create a new {@link Mailer} instance.
    *
    * #### Note: do not use this class directly, prefer {@link createMailer} when possible.
    */
-  constructor({ default: defaultMailer, mailers: { ...config } }: MailerOptions<T>) {
-    this.#default = defaultMailer
+  constructor({ default: defaultMailer, mailers: { ...config } }: MailerOptions) {
+    this.default = defaultMailer
     this.#config = config
   }
 
-  get default() {
-    return this.#default as any
-  }
+  mailer = async (mailer: string | null): Promise<Mailer> => {
+    mailer = mailer === null ? this.default : mailer
 
-  mailer = async (mailer: any): Promise<any> => {
     /**
      * The resolved mailer instance, if any.
      */
     const mailerInstance = this.#mailers[mailer]
 
-    // There is a cached mailer instance, return it
+    // There is a cached mailer instance, returns it
     if (mailerInstance) {
       return mailerInstance
     }
@@ -150,31 +151,33 @@ class _MailerProvider<T extends MailersConfig, TDefaultMailer extends keyof T> i
      */
     const config = this.#config[mailer]
 
-    // Dev: make sure you are requesting a maker that exists
+    // Dev: make sure you are requesting a mailer that exists!
     if (!config) {
-      throw new TypeError(`Mailer ${String(mailer)} is not configured.`)
+      throw new Error(`Mailer ${String(mailer)} is not configured.`)
     }
 
     // Creates and store a new driver
-    return this.#mailers[mailer] = await factory(config) as any
+    return this.#mailers[mailer] = await factory(config)
   }
 
-  sendMail = async (mailOptions: any): Promise<any> => {
+  sendMail = async (mail: SendMailOptions): Promise<any> => {
     /**
      * The resolved mailer instance.
      */
-    const mailerInstance = await this.mailer(this.#default)
+    const mailerInstance = await this.mailer(this.default)
 
-    return await mailerInstance.sendMail(mailOptions)
+    return await mailerInstance.sendMail(mail)
   }
 
-  sendMailWith = async (mailer: any, mailOptions: any): Promise<any> => {
+  sendMailWith = async (mailer: string | null, mail: SendMailOptions): Promise<any> => {
+    mailer = mailer === null ? this.default : mailer
+
     /**
      * The resolved mailer instance.
      */
-    const mailerInstance = await this.mailer(mailer)
+    const mailerInstance = await this.mailer(mailer === null ? this.default : mailer)
 
-    return await mailerInstance.sendMail(mailOptions)
+    return await mailerInstance.sendMail(mail)
   }
 }
 
