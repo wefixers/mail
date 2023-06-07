@@ -116,12 +116,12 @@ class _MailerProvider<TMailer extends string> implements MailerProvider<TMailer>
   /**
    * The mailers config, it contains either a factory or an instance.
    */
-  #config: MailersConfig
+  private _config: MailersConfig
 
   /**
    * The resolved mailers.
    */
-  #mailers: Record<string, Mailer> = {}
+  private _mailers: Record<string, Mailer> = {}
 
   /**
    * Create a new {@link Mailer} instance.
@@ -130,7 +130,7 @@ class _MailerProvider<TMailer extends string> implements MailerProvider<TMailer>
    */
   constructor({ default: defaultMailer, mailers: { ...config } }: MailerOptions) {
     this.default = defaultMailer as TMailer
-    this.#config = config
+    this._config = config
   }
 
   mailer = async (mailer: string | null): Promise<Mailer> => {
@@ -139,7 +139,7 @@ class _MailerProvider<TMailer extends string> implements MailerProvider<TMailer>
     /**
      * The resolved mailer instance, if any.
      */
-    const mailerInstance = this.#mailers[mailer]
+    const mailerInstance = this._mailers[mailer]
 
     // There is a cached mailer instance, returns it
     if (mailerInstance) {
@@ -149,7 +149,7 @@ class _MailerProvider<TMailer extends string> implements MailerProvider<TMailer>
     /**
      * The mailer config, either a factory or an instance.
      */
-    const config = this.#config[mailer]
+    const config = this._config[mailer]
 
     // Dev: make sure you are requesting a mailer that exists!
     if (!config) {
@@ -157,7 +157,7 @@ class _MailerProvider<TMailer extends string> implements MailerProvider<TMailer>
     }
 
     // Creates and store a new driver
-    return this.#mailers[mailer] = await factory(config)
+    return this._mailers[mailer] = await factory(config)
   }
 
   sendMail = async (mail: SendMailOptions): Promise<any> => {
