@@ -1,6 +1,19 @@
 # Changelog
 
 
+## v1.3.0
+
+[compare changes](https://github.com/wefixers/mail/compare/v1.2.1...v1.3.0)
+
+
+### 🏡 Chore
+
+  - Target Node18 and above! ([0aa2834](https://github.com/wefixers/mail/commit/0aa2834))
+
+### ❤️  Contributors
+
+- Lucacicada
+
 ## v1.2.1
 
 [compare changes](https://github.com/wefixers/mail/compare/v1.2.0...v1.2.1)
