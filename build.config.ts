@@ -15,4 +15,9 @@ export default defineBuildConfig({
       outDir: './dist/mailers/ses/',
     },
   ],
+  rollup: {
+    esbuild: {
+      target: 'es2022',
+    },
+  },
 })

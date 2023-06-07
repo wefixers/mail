@@ -15,6 +15,10 @@ _Who am I kiddin, nodemailer is the dependency!_
   - [With custom mailers](#with-custom-mailers)
 - [Caveats](#caveats)
 
+> Starting from v1.3, only Node18 and above are supported
+
+> This package is ESM only!
+
 ## Install
 ```sh
 pnpm i @fixers/mail

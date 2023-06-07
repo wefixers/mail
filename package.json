@@ -36,6 +36,9 @@
     "dist",
     "src"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "unbuild",
     "lint": "eslint .",
