@@ -1,6 +1,21 @@
 # Changelog
 
 
+## v1.2.1
+
+[compare changes](https://github.com/wefixers/mail/compare/v1.2.0...v1.2.1)
+
+
+### 🏡 Chore
+
+  - Move mailers in an index.ts file ([ff3594d](https://github.com/wefixers/mail/commit/ff3594d))
+  - Expose private field with an underscore ([879536a](https://github.com/wefixers/mail/commit/879536a))
+  - Switch to unbuild ([2752fa0](https://github.com/wefixers/mail/commit/2752fa0))
+
+### ❤️  Contributors
+
+- Lucacicada
+
 ## v1.2.0
 
 [compare changes](https://github.com/wefixers/mail/compare/v1.1.1...v1.2.0)

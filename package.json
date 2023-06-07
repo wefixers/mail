@@ -1,7 +1,7 @@
 {
   "name": "@fixers/mail",
   "type": "module",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Extraterrestrial efficiency in email transmission!",
   "author": "Luca <git@lucacicada.me>",
   "license": "MIT",
